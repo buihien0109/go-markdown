@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,400;0,600;0,700;0,800;1,400&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+        integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.css">
+    <link rel="stylesheet" href="/css/style.css">
+    <title>Document</title>
+</head>
+
+<body>
+    <div class="container mt-5">
+        <h1 class="text-center">Chỉnh sửa bài viết</h1>
+        <div class="mt-4 mb-4">
+            <button class="btn btn-success btn-save">Lưu</button>
+            <button class="btn btn-info btn-set-content">Đặt nội dung</button>
+        </div>
+        <div class="form-group">
+            <label for="title">Tiêu đề</label>
+            <input type="text" class="form-control" id="title" value="{{.post.Title}}">
+        </div>
+        <div class="form-group">
+            <label for="content">Nội dung</label>
+            <textarea id="content"></textarea>
+        </div>
+        <div class="form-group">
+            <label for="description">Mô tả</label>
+            <input type="text" class="form-control" id="description" value="{{.post.Description}}">
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.js"></script>
+    <script>
+        window.onload = function () {
+            let simplemde = new SimpleMDE({
+                element: document.getElementById("content"),
+                spellChecker: false,
+
+            });
+
+            simplemde.value({{.post.Content }})
+
+            const btnGet = document.querySelector('.btn-save');
+            const btnSet = document.querySelector('.btn-set-content');
+            const titleEl = document.querySelector('#title');
+            const descriptionEl = document.querySelector('#description');
+
+            btnGet.addEventListener('click', function () {
+                if (titleEl.value == '' || simplemde.value() == '' || descriptionEl.value == '') {
+                    alert('Nội dung không được để trống')
+                    return
+                }
+                let req = {
+                    Title: titleEl.value,
+                    Content: simplemde.value(),
+                    Description: descriptionEl.value
+                }
+
+                fetch(`/post/update/${ {{.post.Id }} }`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(req)
+                })
+                    .then(res => {
+                        return res.json()
+                    })
+                    .then(data => {
+                        console.log(data)
+                    })
+                    .catch(err => {
+                        console.log(err)
+                    })
+            })
+
+            function random() {
+                return Math.floor(Math.random() * 1000)
+            }
+
+            btnSet.addEventListener('click', function () {
+                let number = random()
+                titleEl.value = `Tiêu đề ${ number }`;
+                simplemde.value(`### Nội dung ${ number }`);
+                descriptionEl.value = `Mô tả ${ number }`
+            })
+        }
+    </script>
+</body>
+
+</html>
